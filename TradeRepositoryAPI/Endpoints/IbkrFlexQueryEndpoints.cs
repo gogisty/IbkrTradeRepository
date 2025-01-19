@@ -6,7 +6,7 @@ namespace TradeRepositoryAPI.Endpoints
     {
         public static void MapIbkrFlexQueryEndpoints(this IEndpointRouteBuilder app)
         {
-            app.MapGet("IbkrFlexQuery/GetStatements", async (
+            app.MapGet("flexquery/statements", async (
                 string queryNumber,
                 IbkrService ibkrService,
                 IOptions<IbkrSettings> settings) =>

@@ -1,4 +1,3 @@
-using Microsoft.Extensions.Options;
 using System.Text.Json.Serialization;
 using TradeRepositoryAPI;
 using TradeRepositoryAPI.Endpoints;
@@ -48,7 +47,11 @@ app.MapIbkrFlexQueryEndpoints();
 app.Run();
 
 [JsonSerializable(typeof(Trade[]))]
+[JsonSerializable(typeof(Trades[]))]
 [JsonSerializable(typeof(OptionEAE[]))]
+[JsonSerializable(typeof(FlexQueryResponse[]))]
+[JsonSerializable(typeof(FlexStatement[]))]
+[JsonSerializable(typeof(FlexStatements[]))]
 internal partial class AppJsonSerializerContext : JsonSerializerContext
 {
 

@@ -13,6 +13,6 @@ namespace TradeRepositoryAPI.IbkrResponses
         public string Type { get; set; }
 
         [XmlElement("FlexStatements")]
-        public List<FlexStatement> FlexStatements { get; set; }
+        public FlexStatements FlexStatements { get; set; }
     }
 }

@@ -20,9 +20,9 @@ namespace TradeRepositoryAPI.IbkrResponses
         public string WhenGenerated { get; set; }
 
         [XmlElement("Trades")]
-        public List<Trade> Trades { get; set; }
+        public Trades Trades { get; set; }
 
         [XmlElement("OptionEAE")]
-        public List<OptionEAE> OptionEAE { get; set; }
+        public OptionsEAE OptionsEAE { get; set; }
     }
 }
