@@ -31,6 +31,23 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+if (app.Environment.IsDevelopment())
+{
+    try
+    {
+        using (var scope = app.Services.CreateScope())
+        {
+            var dbContext = scope.ServiceProvider.GetRequiredService<PortfolioDbContext>();
+            dbContext.Database.Migrate(); // Applies migrations automatically
+            Console.WriteLine("Development database migrations applied successfully.");
+        }
+    }
+    catch (Exception ex)
+    {
+        Console.Error.WriteLine($"An error occurred while migrating the database: {ex.Message}");
+    }
+}
+
 app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
 
