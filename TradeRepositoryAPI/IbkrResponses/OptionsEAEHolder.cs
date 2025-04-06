@@ -1,9 +1,8 @@
 ﻿using System.Xml.Serialization;
-using TradeRepositoryAPI.IbkrResponses;
 
-namespace TradeRepositoryAPI
+namespace TradeRepositoryAPI.IbkrResponses
 {
-    public class OptionsEAE
+    public class OptionsEAEHolder
     {
         [XmlElement("OptionEAE")]
         public List<OptionEAE> OptionsEaeList { get; set; }

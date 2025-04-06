@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Options;
+using TradeRepositoryAPI.IbkrClient;
 
 namespace TradeRepositoryAPI.Endpoints
 {

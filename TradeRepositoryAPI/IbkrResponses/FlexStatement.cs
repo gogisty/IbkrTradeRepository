@@ -23,6 +23,6 @@ namespace TradeRepositoryAPI.IbkrResponses
         public Trades Trades { get; set; }
 
         [XmlElement("OptionEAE")]
-        public OptionsEAE OptionsEAE { get; set; }
+        public OptionsEAEHolder OptionsEAE { get; set; }
     }
 }
