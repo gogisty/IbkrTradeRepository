@@ -1,6 +1,7 @@
 using System.Text.Json.Serialization;
 using TradeRepositoryAPI;
 using TradeRepositoryAPI.Endpoints;
+using TradeRepositoryAPI.IbkrClient;
 using TradeRepositoryAPI.IbkrResponses;
 
 var builder = WebApplication.CreateBuilder(args);

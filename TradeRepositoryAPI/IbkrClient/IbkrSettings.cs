@@ -1,4 +1,4 @@
-﻿namespace TradeRepositoryAPI
+﻿namespace TradeRepositoryAPI.IbkrClient
 {
     public record IbkrSettings
     {
