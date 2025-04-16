@@ -1,5 +1,6 @@
 using IbkrTradeRepository.PortalApp.Data;
 using IbkrTradeRepository.PortalApp.Infrastructure.Persistance;
+using IbkrTradeRepository.PortalApp.Infrastructure.Persistance.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -14,6 +15,9 @@ builder.Services.AddDbContext<PortfolioDbContext>(options =>
     var connectionString = builder.Configuration.GetConnectionString("PortfolioDb") ?? throw new ArgumentException("Empty connection string");
     options.UseNpgsql(connectionString);
 });
+
+builder.Services.AddScoped<ICashTransactionRepository, CashTransactionRepository>();
+builder.Services.AddScoped<IAccountRepository, AccountRepository>();
 
 var app = builder.Build();
 
@@ -35,12 +39,10 @@ if (app.Environment.IsDevelopment())
 {
     try
     {
-        using (var scope = app.Services.CreateScope())
-        {
-            var dbContext = scope.ServiceProvider.GetRequiredService<PortfolioDbContext>();
-            dbContext.Database.Migrate(); // Applies migrations automatically
-            Console.WriteLine("Development database migrations applied successfully.");
-        }
+        using var scope = app.Services.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<PortfolioDbContext>();
+        dbContext.Database.Migrate();
+        Console.WriteLine("Development database migrations applied successfully.");
     }
     catch (Exception ex)
     {
