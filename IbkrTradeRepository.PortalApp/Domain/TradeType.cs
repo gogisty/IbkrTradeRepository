@@ -3,6 +3,7 @@
     public enum TradeType
     {
         Stock,
-        Option
+        Option,
+        Forex
     }
 }

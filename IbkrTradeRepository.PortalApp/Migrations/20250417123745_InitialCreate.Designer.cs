@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace IbkrTradeRepository.PortalApp.Migrations
 {
     [DbContext(typeof(PortfolioDbContext))]
-    [Migration("20250328132556_InitialCreate")]
+    [Migration("20250417123745_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -92,7 +92,7 @@ namespace IbkrTradeRepository.PortalApp.Migrations
                     b.ToTable("CashTransactions", (string)null);
                 });
 
-            modelBuilder.Entity("IbkrTradeRepository.PortalApp.Domain.OptionTrade", b =>
+            modelBuilder.Entity("IbkrTradeRepository.PortalApp.Domain.OptionTradeDetails", b =>
                 {
                     b.Property<Guid>("TradeId")
                         .HasColumnType("uuid");
@@ -107,16 +107,19 @@ namespace IbkrTradeRepository.PortalApp.Migrations
 
                     b.Property<string>("OptionType")
                         .IsRequired()
-                        .HasMaxLength(4)
-                        .HasColumnType("character varying(4)");
+                        .HasColumnType("text");
 
                     b.Property<decimal>("StrikePrice")
-                        .HasPrecision(18, 8)
-                        .HasColumnType("numeric(18,8)");
+                        .HasColumnType("decimal(18,4)");
+
+                    b.Property<string>("UnderlyingSymbol")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.HasKey("TradeId");
 
-                    b.ToTable("OptionTrades", (string)null);
+                    b.ToTable("OptionTradeDetails", (string)null);
                 });
 
             modelBuilder.Entity("IbkrTradeRepository.PortalApp.Domain.Trade", b =>
@@ -128,90 +131,43 @@ namespace IbkrTradeRepository.PortalApp.Migrations
                     b.Property<Guid>("AccountId")
                         .HasColumnType("uuid");
 
-                    b.Property<decimal?>("ClosePrice")
-                        .HasPrecision(18, 8)
-                        .HasColumnType("numeric(18,8)");
-
                     b.Property<decimal>("Commission")
-                        .HasPrecision(18, 8)
-                        .HasColumnType("numeric(18,8)");
+                        .HasColumnType("numeric");
 
-                    b.Property<DateTime>("EntryDate")
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("character varying(3)");
+
+                    b.Property<decimal>("Proceeds")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("Quantity")
+                        .HasColumnType("numeric");
+
+                    b.Property<string>("Symbol")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<DateTime>("TradeDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<DateTime?>("ExitDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<decimal>("OpenPrice")
-                        .HasPrecision(18, 8)
-                        .HasColumnType("numeric(18,8)");
-
-                    b.Property<int>("Quantity")
+                    b.Property<int>("TradeDirection")
                         .HasColumnType("integer");
 
-                    b.Property<decimal?>("RealizedPnL")
-                        .HasPrecision(18, 8)
-                        .HasColumnType("numeric(18,8)");
-
-                    b.Property<string>("Ticker")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)");
+                    b.Property<decimal>("TradePrice")
+                        .HasColumnType("numeric");
 
                     b.Property<string>("TradeType")
                         .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("character varying(10)");
-
-                    b.Property<string>("UnderlyingTicker")
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
                     b.HasIndex("AccountId");
 
                     b.ToTable("Trades", (string)null);
-                });
-
-            modelBuilder.Entity("IbkrTradeRepository.PortalApp.Domain.TradeTransaction", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Currency")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(3)
-                        .HasColumnType("character varying(3)")
-                        .HasDefaultValue("EUR");
-
-                    b.Property<DateTime>("ExecutionDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("OrderType")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)")
-                        .HasDefaultValue("Market");
-
-                    b.Property<decimal>("Price")
-                        .HasPrecision(18, 8)
-                        .HasColumnType("numeric(18,8)");
-
-                    b.Property<int>("Quantity")
-                        .HasColumnType("integer");
-
-                    b.Property<Guid>("TradeId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("TradeId");
-
-                    b.ToTable("TradeTransactions", (string)null);
                 });
 
             modelBuilder.Entity("IbkrTradeRepository.PortalApp.Domain.CashTransaction", b =>
@@ -225,11 +181,13 @@ namespace IbkrTradeRepository.PortalApp.Migrations
                     b.Navigation("Account");
                 });
 
-            modelBuilder.Entity("IbkrTradeRepository.PortalApp.Domain.OptionTrade", b =>
+            modelBuilder.Entity("IbkrTradeRepository.PortalApp.Domain.OptionTradeDetails", b =>
                 {
                     b.HasOne("IbkrTradeRepository.PortalApp.Domain.Trade", "Trade")
                         .WithOne("OptionDetails")
-                        .HasForeignKey("IbkrTradeRepository.PortalApp.Domain.OptionTrade", "TradeId");
+                        .HasForeignKey("IbkrTradeRepository.PortalApp.Domain.OptionTradeDetails", "TradeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Trade");
                 });
@@ -245,17 +203,6 @@ namespace IbkrTradeRepository.PortalApp.Migrations
                     b.Navigation("Account");
                 });
 
-            modelBuilder.Entity("IbkrTradeRepository.PortalApp.Domain.TradeTransaction", b =>
-                {
-                    b.HasOne("IbkrTradeRepository.PortalApp.Domain.Trade", "Trade")
-                        .WithMany("Transactions")
-                        .HasForeignKey("TradeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Trade");
-                });
-
             modelBuilder.Entity("IbkrTradeRepository.PortalApp.Domain.Account", b =>
                 {
                     b.Navigation("CashTransactions");
@@ -266,8 +213,6 @@ namespace IbkrTradeRepository.PortalApp.Migrations
             modelBuilder.Entity("IbkrTradeRepository.PortalApp.Domain.Trade", b =>
                 {
                     b.Navigation("OptionDetails");
-
-                    b.Navigation("Transactions");
                 });
 #pragma warning restore 612, 618
         }

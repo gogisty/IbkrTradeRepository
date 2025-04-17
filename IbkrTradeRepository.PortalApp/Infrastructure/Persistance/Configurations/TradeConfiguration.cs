@@ -8,64 +8,29 @@ namespace IbkrTradeRepository.PortalApp.Infrastructure.Persistance.Configuration
     {
         public void Configure(EntityTypeBuilder<Trade> builder)
         {
-            builder.ToTable("Trades");
-
             builder.HasKey(t => t.Id);
 
-            builder.Property(t => t.Ticker)
+            builder.Property(t => t.Symbol)
                 .IsRequired()
-                .HasMaxLength(20);
+                .HasMaxLength(50);
 
-            builder.Property(t => t.UnderlyingTicker)
-                .HasMaxLength(20);
+            builder.Property(t => t.Currency)
+                .IsRequired()
+                .HasMaxLength(3);
 
             builder.Property(t => t.TradeType)
-                .IsRequired()
                 .HasConversion<string>()
-                .HasMaxLength(10);
-
-            builder.Property(t => t.EntryDate)
                 .IsRequired();
 
-            // DateTime? remains nullable
+            builder.HasOne(t => t.Account)
+                .WithMany(a => a.Trades)
+                .HasForeignKey(t => t.AccountId);
 
-            builder.Property(t => t.Quantity)
-                .IsRequired();
-
-            // Configure decimal precision and scale
-            builder.Property(t => t.OpenPrice)
-                .IsRequired()
-                .HasPrecision(18, 8);
-
-            builder.Property(t => t.ClosePrice)
-                .HasPrecision(18, 8);
-
-            builder.Property(t => t.RealizedPnL)
-                .HasPrecision(18, 8);
-
-            builder.Property(t => t.Commission)
-                .IsRequired()
-                .HasPrecision(18, 8);
-
-            // AccountId Foreign Key (defined relationship in AccountConfiguration)
-            // builder.Property(t => t.AccountId).IsRequired(); // Ensured by relationship config
-
-            // --- Relationships ---
-
-            // Many-to-One: Trade -> Account (configured primarily in AccountConfiguration)
-            // builder.HasOne(t => t.Account) ... // Redundant if configured fully in AccountConfiguration
-
-            // One-to-One: Trade -> OptionTrade
             builder.HasOne(t => t.OptionDetails)
-                .WithOne(o => o.Trade)
-                .HasForeignKey<OptionTrade>(o => o.TradeId)
-                .IsRequired(false);
+                .WithOne(optionDetails => optionDetails.Trade)
+                .HasForeignKey<OptionTradeDetails>(optionDetails => optionDetails.TradeId);
 
-            // One-to-Many: Trade -> TradeTransactions
-            builder.HasMany(t => t.Transactions)
-                .WithOne(tt => tt.Trade)
-                .HasForeignKey(tt => tt.TradeId)
-                .IsRequired();                
+            builder.ToTable("Trades");
         }
     }
 }

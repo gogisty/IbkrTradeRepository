@@ -53,16 +53,15 @@ namespace IbkrTradeRepository.PortalApp.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Ticker = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
-                    UnderlyingTicker = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: true),
-                    TradeType = table.Column<string>(type: "character varying(10)", maxLength: 10, nullable: false),
-                    EntryDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    ExitDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    Quantity = table.Column<int>(type: "integer", nullable: false),
-                    OpenPrice = table.Column<decimal>(type: "numeric(18,8)", precision: 18, scale: 8, nullable: false),
-                    ClosePrice = table.Column<decimal>(type: "numeric(18,8)", precision: 18, scale: 8, nullable: true),
-                    RealizedPnL = table.Column<decimal>(type: "numeric(18,8)", precision: 18, scale: 8, nullable: true),
-                    Commission = table.Column<decimal>(type: "numeric(18,8)", precision: 18, scale: 8, nullable: false),
+                    Symbol = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    TradeDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Quantity = table.Column<decimal>(type: "numeric", nullable: false),
+                    TradePrice = table.Column<decimal>(type: "numeric", nullable: false),
+                    Proceeds = table.Column<decimal>(type: "numeric", nullable: false),
+                    Commission = table.Column<decimal>(type: "numeric", nullable: false),
+                    Currency = table.Column<string>(type: "character varying(3)", maxLength: 3, nullable: false),
+                    TradeType = table.Column<string>(type: "text", nullable: false),
+                    TradeDirection = table.Column<int>(type: "integer", nullable: false),
                     AccountId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
@@ -77,42 +76,21 @@ namespace IbkrTradeRepository.PortalApp.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "OptionTrades",
+                name: "OptionTradeDetails",
                 columns: table => new
                 {
                     TradeId = table.Column<Guid>(type: "uuid", nullable: false),
-                    OptionType = table.Column<string>(type: "character varying(4)", maxLength: 4, nullable: false),
-                    StrikePrice = table.Column<decimal>(type: "numeric(18,8)", precision: 18, scale: 8, nullable: false),
+                    StrikePrice = table.Column<decimal>(type: "numeric(18,4)", nullable: false),
                     ExpirationDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    OptionType = table.Column<string>(type: "text", nullable: false),
+                    UnderlyingSymbol = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     Multiplier = table.Column<int>(type: "integer", nullable: false, defaultValue: 100)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_OptionTrades", x => x.TradeId);
+                    table.PrimaryKey("PK_OptionTradeDetails", x => x.TradeId);
                     table.ForeignKey(
-                        name: "FK_OptionTrades_Trades_TradeId",
-                        column: x => x.TradeId,
-                        principalTable: "Trades",
-                        principalColumn: "Id");
-                });
-
-            migrationBuilder.CreateTable(
-                name: "TradeTransactions",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    TradeId = table.Column<Guid>(type: "uuid", nullable: false),
-                    ExecutionDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    Quantity = table.Column<int>(type: "integer", nullable: false),
-                    Currency = table.Column<string>(type: "character varying(3)", maxLength: 3, nullable: false, defaultValue: "EUR"),
-                    Price = table.Column<decimal>(type: "numeric(18,8)", precision: 18, scale: 8, nullable: false),
-                    OrderType = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false, defaultValue: "Market")
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_TradeTransactions", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_TradeTransactions_Trades_TradeId",
+                        name: "FK_OptionTradeDetails_Trades_TradeId",
                         column: x => x.TradeId,
                         principalTable: "Trades",
                         principalColumn: "Id",
@@ -128,11 +106,6 @@ namespace IbkrTradeRepository.PortalApp.Migrations
                 name: "IX_Trades_AccountId",
                 table: "Trades",
                 column: "AccountId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_TradeTransactions_TradeId",
-                table: "TradeTransactions",
-                column: "TradeId");
         }
 
         /// <inheritdoc />
@@ -142,10 +115,7 @@ namespace IbkrTradeRepository.PortalApp.Migrations
                 name: "CashTransactions");
 
             migrationBuilder.DropTable(
-                name: "OptionTrades");
-
-            migrationBuilder.DropTable(
-                name: "TradeTransactions");
+                name: "OptionTradeDetails");
 
             migrationBuilder.DropTable(
                 name: "Trades");

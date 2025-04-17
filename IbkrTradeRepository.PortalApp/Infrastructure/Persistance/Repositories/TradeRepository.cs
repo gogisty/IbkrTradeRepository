@@ -17,7 +17,6 @@ namespace IbkrTradeRepository.PortalApp.Infrastructure.Persistance.Repositories
             return await _dbContext.Trades
                 .Where(t => t.AccountId == accountId)
                 .Include(t => t.OptionDetails)
-                .Include(t => t.Transactions)
                 .ToListAsync();
         }
 
@@ -25,7 +24,6 @@ namespace IbkrTradeRepository.PortalApp.Infrastructure.Persistance.Repositories
         {
             return await _dbContext.Trades
                 .Include(t => t.OptionDetails)
-                .Include(t => t.Transactions)
                 .FirstOrDefaultAsync(t => t.Id == id);
         }
 
