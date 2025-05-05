@@ -11,6 +11,7 @@ namespace IbkrTradeRepository.PortalApp.Infrastructure.Persistance
         public DbSet<Trade> Trades => Set<Trade>();
         public DbSet<OptionTradeDetails> OptionTradeDetails => Set<OptionTradeDetails>();
         public DbSet<CashTransaction> CashTransactions => Set<CashTransaction>();
+        public DbSet<IbkrCode> IbkrCodes => Set<IbkrCode>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

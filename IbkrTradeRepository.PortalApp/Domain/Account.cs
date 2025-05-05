@@ -1,6 +1,4 @@
-﻿using System.Diagnostics;
-
-namespace IbkrTradeRepository.PortalApp.Domain
+﻿namespace IbkrTradeRepository.PortalApp.Domain
 {
     public class Account
     {
@@ -8,7 +6,6 @@ namespace IbkrTradeRepository.PortalApp.Domain
         public string BrokerName { get; set; } = default!;
         public string AccountNumber { get; set; } = default!;
         public string BaseCurrency { get; set; } = "EUR";
-
         public List<Trade> Trades { get; set; } = new();
         public List<CashTransaction> CashTransactions { get; set; } = new();
     }

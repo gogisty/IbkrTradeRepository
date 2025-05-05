@@ -19,6 +19,8 @@ builder.Services.AddDbContext<PortfolioDbContext>(options =>
 builder.Services.AddScoped<ICashTransactionRepository, CashTransactionRepository>();
 builder.Services.AddScoped<IAccountRepository, AccountRepository>();
 builder.Services.AddScoped<ITradeRepository, TradeRepository>();
+builder.Services.AddScoped<ICsvFileProcessor, CsvFileProcessor>();
+
 
 var app = builder.Build();
 
