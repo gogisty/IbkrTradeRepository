@@ -48,5 +48,11 @@ namespace IbkrTradeRepository.PortalApp.Infrastructure.Persistance.Repositories
                 await _dbContext.SaveChangesAsync();
             }
         }
+
+        public async Task AddTradesAsync(IEnumerable<Trade> trades)
+        {
+            await _dbContext.Trades.AddRangeAsync(trades);
+            await _dbContext.SaveChangesAsync();
+        }
     }
 }

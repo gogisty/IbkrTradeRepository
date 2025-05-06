@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace IbkrTradeRepository.PortalApp.Migrations
 {
     [DbContext(typeof(PortfolioDbContext))]
-    [Migration("20250417123745_InitialCreate")]
+    [Migration("20250506162736_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -92,6 +92,21 @@ namespace IbkrTradeRepository.PortalApp.Migrations
                     b.ToTable("CashTransactions", (string)null);
                 });
 
+            modelBuilder.Entity("IbkrTradeRepository.PortalApp.Domain.IbkrCode", b =>
+                {
+                    b.Property<string>("Code")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
+                    b.HasKey("Code");
+
+                    b.ToTable("IbkrCodes");
+                });
+
             modelBuilder.Entity("IbkrTradeRepository.PortalApp.Domain.OptionTradeDetails", b =>
                 {
                     b.Property<Guid>("TradeId")
@@ -131,6 +146,9 @@ namespace IbkrTradeRepository.PortalApp.Migrations
                     b.Property<Guid>("AccountId")
                         .HasColumnType("uuid");
 
+                    b.Property<string>("Code1")
+                        .HasColumnType("text");
+
                     b.Property<decimal>("Commission")
                         .HasColumnType("numeric");
 
@@ -167,6 +185,8 @@ namespace IbkrTradeRepository.PortalApp.Migrations
 
                     b.HasIndex("AccountId");
 
+                    b.HasIndex("Code1");
+
                     b.ToTable("Trades", (string)null);
                 });
 
@@ -200,7 +220,13 @@ namespace IbkrTradeRepository.PortalApp.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("IbkrTradeRepository.PortalApp.Domain.IbkrCode", "Code")
+                        .WithMany()
+                        .HasForeignKey("Code1");
+
                     b.Navigation("Account");
+
+                    b.Navigation("Code");
                 });
 
             modelBuilder.Entity("IbkrTradeRepository.PortalApp.Domain.Account", b =>

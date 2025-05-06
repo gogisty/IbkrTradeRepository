@@ -18,6 +18,12 @@ namespace IbkrTradeRepository.PortalApp.Infrastructure.Persistance.Repositories
             await _context.SaveChangesAsync();
         }
 
+        public async Task AddCashTransactionsAsync(IEnumerable<CashTransaction> cashTransactions)
+        {
+            await _context.CashTransactions.AddRangeAsync(cashTransactions);
+            await _context.SaveChangesAsync();
+        }
+
         public async Task<CashTransaction?> GetCashTransactionByIdAsync(Guid id)
         {
             return await _context.CashTransactions
