@@ -30,6 +30,11 @@ namespace IbkrTradeRepository.PortalApp.Infrastructure.Persistance.Configuration
                 .WithOne(optionDetails => optionDetails.Trade)
                 .HasForeignKey<OptionTradeDetails>(optionDetails => optionDetails.TradeId);
 
+            builder.HasOne(t => t.IbkrCode)
+                .WithMany()
+                .HasForeignKey(t => t.Code)
+                .HasPrincipalKey(c => c.Code);
+
             builder.ToTable("Trades");
         }
     }

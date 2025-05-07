@@ -29,9 +29,13 @@
     {
         uploads.Add(browserFile);
 
-        // hand off the stream to your parsing service
-        await using var stream = browserFile.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024); // 10 MB
-        await CsvService.ParseAsync(stream, browserFile.Name);
+        // Buffer the stream into a MemoryStream
+        await using var sourceStream = browserFile.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024); // 10 MB
+        using var memoryStream = new MemoryStream();
+        await sourceStream.CopyToAsync(memoryStream);
+        memoryStream.Position = 0;
+
+        await CsvService.ParseAsync(memoryStream, browserFile.Name);
 
         StateHasChanged();
     }

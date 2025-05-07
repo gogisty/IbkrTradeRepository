@@ -10,34 +10,61 @@ namespace IbkrTradeRepository.PortalApp.Data.CsvParser
     public class CashTransactionParser : ICsvParserAndSaveStrategy
     {
         private readonly ICashTransactionRepository _cashTransactionRepository;
+        private readonly IAccountRepository _accountRepository;
 
-        public CashTransactionParser(ICashTransactionRepository cashTransactionRepository)
-        {
-            this._cashTransactionRepository = cashTransactionRepository;
+        public CashTransactionParser(ICashTransactionRepository cashTransactionRepository, IAccountRepository accountRepository)
+        {          
+            _cashTransactionRepository = cashTransactionRepository;
+            _accountRepository = accountRepository;
         }
 
         public async Task ParseAndSaveAsync(Stream csvStream, string fileName)
         {
-            var records = Parse(csvStream);
+            var records = await ParseAsync(csvStream);
+            var accountNumber = fileName.Split('_')[0];
 
-            // TODO: Map to account from the file name
-            await _cashTransactionRepository.AddCashTransactionsAsync(records);
+            if (records.Any())
+            {
+                await ValidateAndSaveTransactionAsync(records, accountNumber);
+            }            
         }
 
-        private IEnumerable<CashTransaction> Parse(Stream csvStream)
+        private async Task ValidateAndSaveTransactionAsync(IEnumerable<CashTransaction> cashTransactions, string accountNumber)
+        {
+            var account = await _accountRepository.GetAccountByNumber(accountNumber) ?? throw new InvalidOperationException($"Account with number {accountNumber} does not exist.");
+
+            foreach (var transaction in cashTransactions)
+            {
+                transaction.Account = account;
+                transaction.AccountId = account.Id;
+            }
+
+            await _cashTransactionRepository.AddCashTransactionsAsync(cashTransactions);
+        }
+
+        private async Task<IEnumerable<CashTransaction>> ParseAsync(Stream csvStream)
         {
             using var reader = new StreamReader(csvStream);
             using var csv = new CsvReader(reader, CultureInfo.InvariantCulture);
 
             csv.Context.RegisterClassMap<CashTransactionMap>();
-            return csv.GetRecords<CashTransaction>().ToList();
+
+            var records = new List<CashTransaction>();
+            
+            await foreach (var record in csv.GetRecordsAsync<CashTransaction>())
+            {
+                records.Add(record);
+            }
+
+            return records;
         }
 
         private sealed class CashTransactionMap : ClassMap<CashTransaction>
         {
             public CashTransactionMap()
             {
-                Map(m => m.TransactionDate).Name("Date");
+                Map(m => m.Id).Constant(new Guid());
+                Map(m => m.TransactionDate).Name("Date").TypeConverter<DateOnlyConverter>();
                 Map(m => m.Description).Name("Description");
                 Map(m => m.Amount).Name("Amount");
                 Map(m => m.Currency).Name("Currency");
@@ -51,13 +78,42 @@ namespace IbkrTradeRepository.PortalApp.Data.CsvParser
 
             public override object ConvertFromString(string text, IReaderRow row, MemberMapData memberMapData)
             {
-                if (!Enum.TryParse(text, out CashTransactionType cashTransactionType))
-                {                    
-                    // If an invalid value is found in the CSV for the Aggregate column, throw an exception...
-                    throw new InvalidCastException($"Invalid value to EnumConverter. Type: {typeof(T)} Value: {text}");
+                if (string.IsNullOrWhiteSpace(text))
+                {
+                    throw new InvalidCastException($"Enum value cannot be null or empty. Type: {typeof(T)}");
                 }
 
-                return cashTransactionType;
+                if (typeof(T) == typeof(CashTransactionType))
+                {
+                    if (!Enum.TryParse<CashTransactionType>(text, true, out var cashTransactionType))
+                    {
+                        throw new InvalidCastException($"Invalid value to EnumConverter for CashTransactionType. Value: '{text}'");
+                    }
+                    return cashTransactionType;
+                }
+                
+                return base.ConvertFromString(text, row, memberMapData);
+            }
+        }
+
+        private sealed class DateOnlyConverter : ITypeConverter
+        {
+            public object ConvertFromString(string text, IReaderRow row, MemberMapData memberMapData)
+            {
+                if (string.IsNullOrWhiteSpace(text))
+                {
+                    throw new InvalidCastException($"DateOnly value cannot be null or empty.");
+                }
+                if (DateOnly.TryParse(text, out var date))
+                {
+                    return date;
+                }
+                throw new InvalidCastException($"Invalid value to DateTimeConverter. Value: '{text}'");
+            }
+
+            public string ConvertToString(object value, IWriterRow row, MemberMapData memberMapData)
+            {
+                return ((DateTime)value).ToString("yyyy-MM-dd");
             }
         }
     }

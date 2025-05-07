@@ -1,7 +1,5 @@
-﻿
-using CsvHelper;
+﻿using CsvHelper;
 using CsvHelper.Configuration;
-using CsvHelper.TypeConversion;
 using IbkrTradeRepository.PortalApp.Domain;
 using IbkrTradeRepository.PortalApp.Infrastructure.Persistance.Repositories;
 using System.Globalization;
@@ -11,28 +9,44 @@ namespace IbkrTradeRepository.PortalApp.Data.CsvParser
     public class StockTradeParser : ICsvParserAndSaveStrategy
     {
         private readonly ITradeRepository _tradeRepository;
+        private readonly IAccountRepository _accountRepository;
 
-        public StockTradeParser(ITradeRepository tradeRepository)
+        public StockTradeParser(ITradeRepository tradeRepository, IAccountRepository accountRepository)
         {
             _tradeRepository = tradeRepository;
+            _accountRepository = accountRepository;
         }
 
         public async Task ParseAndSaveAsync(Stream csvStream, string fileName)
         {
-            var records = this.Parse(csvStream);
+            var records = await ParseAsync(csvStream);
 
-            // Todo records link to account and make sure all field are populated
+            if(records.Any())
+            {
+                var accountNumber = fileName.Split('_')[0];
+                var account = await _accountRepository.GetAccountByNumber(accountNumber) ?? throw new InvalidOperationException($"Account with number {accountNumber} does not exist.");
 
-            await _tradeRepository.AddTradesAsync(records);
+
+                // Todo records link to account and make sure all field are populated
+                await _tradeRepository.AddTradesAsync(records);
+            }            
         }
 
-        private IEnumerable<Trade> Parse(Stream csvStream)
+        private async Task<IEnumerable<Trade>> ParseAsync(Stream csvStream)
         {
             using var reader = new StreamReader(csvStream);
             using var csv = new CsvReader(reader, CultureInfo.InvariantCulture);
 
             csv.Context.RegisterClassMap<StockTradeMap>();
-            return csv.GetRecords<Trade>().ToList();
+
+            var trades = new List<Trade>();
+
+            await foreach (var record in csv.GetRecordsAsync<Trade>())
+            {
+                trades.Add(record);
+            }
+
+            return trades;
         }
 
         private sealed class StockTradeMap : ClassMap<Trade>

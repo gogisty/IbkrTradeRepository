@@ -1,5 +1,4 @@
-﻿
-using CsvHelper;
+﻿using CsvHelper;
 using CsvHelper.Configuration;
 using IbkrTradeRepository.PortalApp.Domain;
 using IbkrTradeRepository.PortalApp.Infrastructure.Persistance.Repositories;
@@ -9,30 +8,42 @@ namespace IbkrTradeRepository.PortalApp.Data.CsvParser
 {
     public class OptionsTradeParser : ICsvParserAndSaveStrategy
     {
-        private readonly Infrastructure.Persistance.Repositories.ITradeRepository _tradeRepository;
+        private readonly ITradeRepository _tradeRepository;
+        private readonly IAccountRepository _accountRepository;
 
-        public OptionsTradeParser(ITradeRepository tradeRepository)
+        public OptionsTradeParser(ITradeRepository tradeRepository, IAccountRepository accountRepository)
         {
             _tradeRepository = tradeRepository;
+            _accountRepository = accountRepository;
         }
 
         public async Task ParseAndSaveAsync(Stream csvStream, string fileName)
         {
-            var records = this.Parse(csvStream);
+            var trades = await ParseAsync(csvStream);
 
-            // Todo records link to account and make sure all field are populated
-            // Check option details!
+            if(trades.Any())
+            {
+                // Todo records link to account and make sure all field are populated
+                // Check option details!
 
-            await _tradeRepository.AddTradesAsync(records);
+                await _tradeRepository.AddTradesAsync(trades);
+            }           
         }
 
-        private IEnumerable<Trade> Parse(Stream csvStream)
+        private async Task<IEnumerable<Trade>> ParseAsync(Stream csvStream)
         {
             using var reader = new StreamReader(csvStream);
             using var csv = new CsvReader(reader, CultureInfo.InvariantCulture);
 
             csv.Context.RegisterClassMap<OptionsTradeMap>();
-            return csv.GetRecords<Trade>().ToList();
+
+            var trades = new List<Trade>();
+
+            await foreach (var record in csv.GetRecordsAsync<Trade>())
+            {
+                trades.Add(record);
+            }
+            return trades;
         }
 
         private sealed class OptionsTradeMap : ClassMap<Trade>
@@ -49,7 +60,7 @@ namespace IbkrTradeRepository.PortalApp.Data.CsvParser
                 Map(m => m.TradeType).Constant(TradeType.Option);
 
                 // TODO: Custom mapper for the Option Details!
-                Map(m => m.OptionDetails!.Multiplier).Name("Multiplier");
+                //Map(m => m.OptionDetails!.Multiplier).Name("Multiplier");
             }
         }
     }

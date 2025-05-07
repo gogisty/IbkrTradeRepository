@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace IbkrTradeRepository.PortalApp.Migrations
 {
     [DbContext(typeof(PortfolioDbContext))]
-    [Migration("20250506162736_InitialCreate")]
+    [Migration("20250507111125_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -77,8 +77,8 @@ namespace IbkrTradeRepository.PortalApp.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)");
 
-                    b.Property<DateTime>("TransactionDate")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<DateOnly>("TransactionDate")
+                        .HasColumnType("date");
 
                     b.Property<string>("TransactionType")
                         .IsRequired()
@@ -146,7 +146,8 @@ namespace IbkrTradeRepository.PortalApp.Migrations
                     b.Property<Guid>("AccountId")
                         .HasColumnType("uuid");
 
-                    b.Property<string>("Code1")
+                    b.Property<string>("Code")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<decimal>("Commission")
@@ -185,7 +186,7 @@ namespace IbkrTradeRepository.PortalApp.Migrations
 
                     b.HasIndex("AccountId");
 
-                    b.HasIndex("Code1");
+                    b.HasIndex("Code");
 
                     b.ToTable("Trades", (string)null);
                 });
@@ -220,13 +221,15 @@ namespace IbkrTradeRepository.PortalApp.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("IbkrTradeRepository.PortalApp.Domain.IbkrCode", "Code")
+                    b.HasOne("IbkrTradeRepository.PortalApp.Domain.IbkrCode", "IbkrCode")
                         .WithMany()
-                        .HasForeignKey("Code1");
+                        .HasForeignKey("Code")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Account");
 
-                    b.Navigation("Code");
+                    b.Navigation("IbkrCode");
                 });
 
             modelBuilder.Entity("IbkrTradeRepository.PortalApp.Domain.Account", b =>

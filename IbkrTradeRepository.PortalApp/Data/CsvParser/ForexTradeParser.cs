@@ -1,6 +1,5 @@
 ﻿using CsvHelper;
 using CsvHelper.Configuration;
-using CsvHelper.TypeConversion;
 using IbkrTradeRepository.PortalApp.Domain;
 using IbkrTradeRepository.PortalApp.Infrastructure.Persistance.Repositories;
 using System.Globalization;
@@ -18,20 +17,31 @@ namespace IbkrTradeRepository.PortalApp.Data.CsvParser
 
         public async Task ParseAndSaveAsync(Stream csvStream, string fileName)
         {
-            var records = this.Parse(csvStream);
+            var records = await ParseAsync(csvStream);
 
-            // Todo records link to account and make sure all field are populated
+            if (records.Any())
+            {
+                // Todo records link to account and make sure all field are populated
 
-            await _tradeRepository.AddTradesAsync(records);
+                await _tradeRepository.AddTradesAsync(records);
+            }            
         }
 
-        private IEnumerable<Trade> Parse(Stream csvStream)
+        private async Task<IEnumerable<Trade>> ParseAsync(Stream csvStream)
         {
             using var reader = new StreamReader(csvStream);
             using var csv = new CsvReader(reader, CultureInfo.InvariantCulture);
 
             csv.Context.RegisterClassMap<ForexTradeMap>();
-            return csv.GetRecords<Trade>().ToList();
+
+            var trades = new List<Trade>(); 
+
+            await foreach (var record in csv.GetRecordsAsync<Trade>())
+            {
+                trades.Add(record);
+            }
+
+            return trades;
         }
 
         private sealed class ForexTradeMap : ClassMap<Trade>
