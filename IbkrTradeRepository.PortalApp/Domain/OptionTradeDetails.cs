@@ -5,7 +5,7 @@
         public Guid TradeId { get; set; }
         public Trade Trade { get; set; } = default!;
         public decimal StrikePrice { get; set; }
-        public DateTime ExpirationDate { get; set; }
+        public DateOnly ExpirationDate { get; set; }
         public OptionType OptionType { get; set; }
         public string UnderlyingSymbol { get; set; } = default!;
         public int Multiplier { get; set; } = 100;

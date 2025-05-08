@@ -15,7 +15,6 @@
         public Guid AccountId { get; set; }
         public Account Account { get; set; } = default!;
         public OptionTradeDetails? OptionDetails { get; set; }
-        public string Code { get; set; }
-        public IbkrCode IbkrCode { get; set; }
+        public string? Codes { get; set; }
     }
 }

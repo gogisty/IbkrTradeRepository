@@ -109,8 +109,8 @@ namespace IbkrTradeRepository.PortalApp.Migrations
                     b.Property<Guid>("TradeId")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("ExpirationDate")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<DateOnly>("ExpirationDate")
+                        .HasColumnType("date");
 
                     b.Property<int>("Multiplier")
                         .ValueGeneratedOnAdd()
@@ -143,8 +143,7 @@ namespace IbkrTradeRepository.PortalApp.Migrations
                     b.Property<Guid>("AccountId")
                         .HasColumnType("uuid");
 
-                    b.Property<string>("Code")
-                        .IsRequired()
+                    b.Property<string>("Codes")
                         .HasColumnType("text");
 
                     b.Property<decimal>("Commission")
@@ -183,8 +182,6 @@ namespace IbkrTradeRepository.PortalApp.Migrations
 
                     b.HasIndex("AccountId");
 
-                    b.HasIndex("Code");
-
                     b.ToTable("Trades", (string)null);
                 });
 
@@ -218,15 +215,7 @@ namespace IbkrTradeRepository.PortalApp.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("IbkrTradeRepository.PortalApp.Domain.IbkrCode", "IbkrCode")
-                        .WithMany()
-                        .HasForeignKey("Code")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Account");
-
-                    b.Navigation("IbkrCode");
                 });
 
             modelBuilder.Entity("IbkrTradeRepository.PortalApp.Domain.Account", b =>

@@ -1,5 +1,6 @@
 ﻿using CsvHelper;
 using CsvHelper.Configuration;
+using CsvHelper.TypeConversion;
 using IbkrTradeRepository.PortalApp.Domain;
 using IbkrTradeRepository.PortalApp.Infrastructure.Persistance.Repositories;
 using System.Globalization;
@@ -21,15 +22,13 @@ namespace IbkrTradeRepository.PortalApp.Data.CsvParser
         {
             var records = await ParseAsync(csvStream);
 
-            if(records.Any())
+            if (records.Any())
             {
                 var accountNumber = fileName.Split('_')[0];
-                var account = await _accountRepository.GetAccountByNumber(accountNumber) ?? throw new InvalidOperationException($"Account with number {accountNumber} does not exist.");
 
-
-                // Todo records link to account and make sure all field are populated
+                await PopulateTrades(records, accountNumber);
                 await _tradeRepository.AddTradesAsync(records);
-            }            
+            }
         }
 
         private async Task<IEnumerable<Trade>> ParseAsync(Stream csvStream)
@@ -49,17 +48,31 @@ namespace IbkrTradeRepository.PortalApp.Data.CsvParser
             return trades;
         }
 
+        private async Task PopulateTrades(IEnumerable<Trade> trades, string accountNumber)
+        {
+            var account = await _accountRepository.GetAccountByNumber(accountNumber) ??
+                throw new InvalidOperationException($"Account with number {accountNumber} does not exist.");
+            
+            foreach (var trade in trades)
+            {                
+                trade.Account = account;
+                trade.AccountId = account.Id;
+                trade.TradeDirection = trade.Quantity > 0 ? TradeDirection.Buy : TradeDirection.Sell;
+            }
+        }
+
         private sealed class StockTradeMap : ClassMap<Trade>
         {
             public StockTradeMap()
             {
                 Map(m => m.Symbol).Name("Symbol");
-                Map(m => m.TradeDate).Name("Date/Time");
+                Map(m => m.TradeDate).Name("Date/Time").TypeConverter<ForexTradeParser.DateTimeConverter>();
                 Map(m => m.Quantity).Name("Quantity");
                 Map(m => m.TradePrice).Name("T.Price");
                 Map(m => m.Proceeds).Name("Proceeds");
                 Map(m => m.Commission).Name("Comm/Fee");
                 Map(m => m.Currency).Name("Currency");
+                Map(m => m.Codes).Name("Code");
                 Map(m => m.TradeType).Constant(TradeType.Stock);
             }
         }

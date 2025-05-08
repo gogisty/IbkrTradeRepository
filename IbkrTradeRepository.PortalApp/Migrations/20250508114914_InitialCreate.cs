@@ -75,7 +75,7 @@ namespace IbkrTradeRepository.PortalApp.Migrations
                     TradeType = table.Column<string>(type: "text", nullable: false),
                     TradeDirection = table.Column<int>(type: "integer", nullable: false),
                     AccountId = table.Column<Guid>(type: "uuid", nullable: false),
-                    Code = table.Column<string>(type: "text", nullable: false)
+                    Codes = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -86,12 +86,6 @@ namespace IbkrTradeRepository.PortalApp.Migrations
                         principalTable: "Accounts",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Trades_IbkrCodes_Code",
-                        column: x => x.Code,
-                        principalTable: "IbkrCodes",
-                        principalColumn: "Code",
-                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -100,7 +94,7 @@ namespace IbkrTradeRepository.PortalApp.Migrations
                 {
                     TradeId = table.Column<Guid>(type: "uuid", nullable: false),
                     StrikePrice = table.Column<decimal>(type: "numeric(18,4)", nullable: false),
-                    ExpirationDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    ExpirationDate = table.Column<DateOnly>(type: "date", nullable: false),
                     OptionType = table.Column<string>(type: "text", nullable: false),
                     UnderlyingSymbol = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     Multiplier = table.Column<int>(type: "integer", nullable: false, defaultValue: 100)
@@ -125,11 +119,6 @@ namespace IbkrTradeRepository.PortalApp.Migrations
                 name: "IX_Trades_AccountId",
                 table: "Trades",
                 column: "AccountId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Trades_Code",
-                table: "Trades",
-                column: "Code");
         }
 
         /// <inheritdoc />
@@ -139,6 +128,9 @@ namespace IbkrTradeRepository.PortalApp.Migrations
                 name: "CashTransactions");
 
             migrationBuilder.DropTable(
+                name: "IbkrCodes");
+
+            migrationBuilder.DropTable(
                 name: "OptionTradeDetails");
 
             migrationBuilder.DropTable(
@@ -146,9 +138,6 @@ namespace IbkrTradeRepository.PortalApp.Migrations
 
             migrationBuilder.DropTable(
                 name: "Accounts");
-
-            migrationBuilder.DropTable(
-                name: "IbkrCodes");
         }
     }
 }
