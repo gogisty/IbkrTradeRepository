@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace IbkrTradeRepository.PortalApp.Migrations
 {
     [DbContext(typeof(PortfolioDbContext))]
-    [Migration("20250508114914_InitialCreate")]
+    [Migration("20250512090649_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -99,8 +99,7 @@ namespace IbkrTradeRepository.PortalApp.Migrations
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("character varying(10)");
+                        .HasColumnType("text");
 
                     b.HasKey("Code");
 

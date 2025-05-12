@@ -11,8 +11,7 @@ namespace IbkrTradeRepository.PortalApp.Infrastructure.Persistance.Configuration
             builder.HasKey(c => c.Code);
 
             builder.Property(c => c.Description)
-                .IsRequired()
-                .HasMaxLength(10);
+                .IsRequired();
         }
     }
 }

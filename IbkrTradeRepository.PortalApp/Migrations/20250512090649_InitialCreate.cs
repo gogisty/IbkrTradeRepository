@@ -30,7 +30,7 @@ namespace IbkrTradeRepository.PortalApp.Migrations
                 columns: table => new
                 {
                     Code = table.Column<string>(type: "text", nullable: false),
-                    Description = table.Column<string>(type: "character varying(10)", maxLength: 10, nullable: false)
+                    Description = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {

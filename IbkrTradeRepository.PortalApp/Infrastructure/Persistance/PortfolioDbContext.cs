@@ -5,7 +5,12 @@ namespace IbkrTradeRepository.PortalApp.Infrastructure.Persistance
 {
     public class PortfolioDbContext : DbContext
     {
-        public PortfolioDbContext(DbContextOptions<PortfolioDbContext> options) : base(options) { }
+        private readonly IConfiguration _appSettings;
+
+        public PortfolioDbContext(DbContextOptions<PortfolioDbContext> options, IConfiguration appSettings) : base(options)
+        {
+            _appSettings = appSettings;
+        }
 
         public DbSet<Account> Accounts => Set<Account>();
         public DbSet<Trade> Trades => Set<Trade>();
@@ -17,5 +22,13 @@ namespace IbkrTradeRepository.PortalApp.Infrastructure.Persistance
         {
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(PortfolioDbContext).Assembly);
         }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) 
+            => optionsBuilder.UseNpgsql(_appSettings.GetConnectionString("PortfolioDb"))
+                .UseSeeding((context, _) =>
+                {
+                    context.Set<IbkrCode>().AddRange(IbkrCodeSeedData.CodesSeedData);
+                    context.SaveChanges();
+                });
     }
 }
