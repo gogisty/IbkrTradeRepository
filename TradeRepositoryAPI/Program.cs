@@ -8,7 +8,6 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
 builder.Services.AddOptions<IbkrSettings>()
     .Bind(builder.Configuration.GetSection("IbkrSettings"))
     .ValidateDataAnnotations()
