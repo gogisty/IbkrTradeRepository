@@ -62,7 +62,7 @@ namespace IbkrTradeRepository.PortalApp.Data.CsvParser
         {
             public CashTransactionMap()
             {
-                Map(m => m.Id).Constant(Guid.NewGuid());
+                Map(m => m.Id).Convert(_ => Guid.NewGuid());
                 Map(m => m.TransactionDate).Name("Date").TypeConverter<DateOnlyConverter>();
                 Map(m => m.Description).Name("Description");
                 Map(m => m.Amount).Name("Amount");

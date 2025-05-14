@@ -18,7 +18,7 @@ namespace IbkrTradeRepository.PortalApp.Data.CsvParser
                 {
                     return date;
                 }
-                throw new InvalidCastException($"Invalid value to DateTimeConverter. Value: '{text}'");
+                throw new InvalidCastException($"Invalid value to DateOnlyConverter. Value: '{text}'");
             }
 
             public string ConvertToString(object value, IWriterRow row, MemberMapData memberMapData)
