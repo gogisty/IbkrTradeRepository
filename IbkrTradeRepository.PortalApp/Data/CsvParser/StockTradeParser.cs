@@ -1,6 +1,5 @@
 ﻿using CsvHelper;
 using CsvHelper.Configuration;
-using CsvHelper.TypeConversion;
 using IbkrTradeRepository.PortalApp.Domain;
 using IbkrTradeRepository.PortalApp.Infrastructure.Persistance.Repositories;
 using System.Globalization;

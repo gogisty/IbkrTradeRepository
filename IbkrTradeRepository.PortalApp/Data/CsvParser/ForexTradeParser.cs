@@ -1,13 +1,12 @@
 ﻿using CsvHelper;
 using CsvHelper.Configuration;
-using CsvHelper.TypeConversion;
 using IbkrTradeRepository.PortalApp.Domain;
 using IbkrTradeRepository.PortalApp.Infrastructure.Persistance.Repositories;
 using System.Globalization;
 
 namespace IbkrTradeRepository.PortalApp.Data.CsvParser
 {
-    public class ForexTradeParser : ICsvParserAndSaveStrategy
+    public partial class ForexTradeParser : ICsvParserAndSaveStrategy
     {
         private readonly ITradeRepository _tradeRepository;
         private readonly IAccountRepository _accountRepository;
@@ -73,29 +72,6 @@ namespace IbkrTradeRepository.PortalApp.Data.CsvParser
                 Map(m => m.Currency).Name("Currency");
                 Map(m => m.Codes).Name("Code");
                 Map(m => m.TradeType).Constant(TradeType.Forex);
-            }
-        }
-
-        public class DateTimeConverter : ITypeConverter
-        {
-            public object ConvertFromString(string text, IReaderRow row, MemberMapData memberMapData)
-            {
-                if (string.IsNullOrWhiteSpace(text))
-                {
-                    throw new InvalidCastException($"Date/Time Value cannot be null or empty.");
-                }
-                
-                if (DateTime.TryParse(text, out var date))
-                {
-                    return DateTime.SpecifyKind(date, DateTimeKind.Utc);
-                }
-
-                throw new InvalidCastException($"Invalid value to DateTimeConverter. Value: '{text}'");
-            }
-
-            public string ConvertToString(object value, IWriterRow row, MemberMapData memberMapData)
-            {
-                return ((DateTime)value).ToString("yyyy-MM-dd HH:mm:ss");
             }
         }
     }
