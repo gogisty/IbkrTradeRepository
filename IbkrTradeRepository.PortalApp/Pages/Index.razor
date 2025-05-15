@@ -1,9 +1,81 @@
 ﻿@page "/"
+@using IbkrTradeRepository.PortalApp.Domain
+@using IbkrTradeRepository.PortalApp.Infrastructure.Persistance.Repositories
 
-<PageTitle>Index</PageTitle>
+@inject ITradeRepository TradeRepository
+@inject ICashTransactionRepository CashTransactionRepository
+@inject IAccountRepository AccountRepository
 
-<h1>Hello, world!</h1>
+<PageTitle>Overview</PageTitle>
 
-Welcome to your new app.
+<h1>All Trades and Cash Transactions</h1>
 
-<SurveyPrompt Title="How is Blazor working for you?" />
+@if (trades == null || cashTransactions == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <h2>Trades</h2>
+    <ul>
+        @foreach (var trade in trades.OrderBy(x => x.TradeDate))
+        {
+            <li>
+                <b>@trade.Symbol</b> - @trade.TradeDate.ToShortDateString() - @trade.Quantity @trade.Currency
+                <br />
+                Type: <span style="color: @(trade.TradeType == TradeType.Option ? "blue" : "black")">@trade.TradeType</span>,
+                Direction: @trade.TradeDirection,
+                Price: @trade.TradePrice,
+                Proceeds: @trade.Proceeds,
+                Commission: @trade.Commission
+                @if (trade.OptionDetails != null)
+                {
+                    <div>
+                        <i>Option Details: @trade.OptionDetails</i>
+                    </div>
+                }
+                @if (!string.IsNullOrEmpty(trade.Codes))
+                {
+                    <div>
+                        <i>Codes: @trade.Codes</i>
+                    </div>
+                }
+            </li>
+        }
+    </ul>
+
+    <h2>Cash Transactions</h2>
+    <ul>
+        @foreach (var cash in cashTransactions.OrderBy(x => x.TransactionDate))
+        {
+            <li>
+                <b>@cash.TransactionDate.ToShortDateString()</b> - @cash.Amount @cash.Currency
+                <br />
+                Type: @cash.TransactionType
+                @if (!string.IsNullOrEmpty(cash.Description))
+                {
+                    <div>
+                        <i>@cash.Description</i>
+                    </div>
+                }
+            </li>
+        }
+    </ul>
+}
+
+@code {
+    private List<IbkrTradeRepository.PortalApp.Domain.Trade> trades = new List<Trade>();
+    private List<IbkrTradeRepository.PortalApp.Domain.CashTransaction> cashTransactions = new List<CashTransaction>();
+    private List<Guid> accountIds;
+
+    protected override async Task OnInitializedAsync()
+    {
+        accountIds = (await AccountRepository.GetAllAccountsAsync()).Select(acc => acc.Id).ToList();
+
+        foreach (var accId in accountIds)
+        {
+            trades.AddRange(await TradeRepository.GetTradesByAccountIdAsync(accId));
+            cashTransactions.AddRange(await CashTransactionRepository.GetCashTransactionsByAccountIdAsync(accId));
+        }        
+    }
+}
