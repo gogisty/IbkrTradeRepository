@@ -16,51 +16,26 @@
 }
 else
 {
-    <h2>Trades</h2>
-    <ul>
-        @foreach (var trade in trades.OrderBy(x => x.TradeDate))
-        {
-            <li>
-                <b>@trade.Symbol</b> - @trade.TradeDate.ToShortDateString() - @trade.Quantity @trade.Currency
-                <br />
-                Type: <span style="color: @(trade.TradeType == TradeType.Option ? "blue" : "black")">@trade.TradeType</span>,
-                Direction: @trade.TradeDirection,
-                Price: @trade.TradePrice,
-                Proceeds: @trade.Proceeds,
-                Commission: @trade.Commission
-                @if (trade.OptionDetails != null)
-                {
-                    <div>
-                        <i>Option Details: @trade.OptionDetails</i>
-                    </div>
-                }
-                @if (!string.IsNullOrEmpty(trade.Codes))
-                {
-                    <div>
-                        <i>Codes: @trade.Codes</i>
-                    </div>
-                }
-            </li>
-        }
-    </ul>
+    // I want to use mudblazod DataGrid in order to hold all the data
+    <MudDataGrid Items="@trades" Filterable="false" SortMode="@SortMode.Single" Groupable="false" title="Trades">
+        <Columns>
+            <PropertyColumn Property="x => x.Symbol" />
+            <PropertyColumn Property="x => x.TradeDate" />
+            <PropertyColumn Property="x => x.TradeDirection" Title="Trade Direction" />
+            <PropertyColumn Property="x => x.Proceeds" Format="C" />
+            <PropertyColumn Property="x => x.TradeType"/>
+        </Columns>
+    </MudDataGrid>
 
-    <h2>Cash Transactions</h2>
-    <ul>
-        @foreach (var cash in cashTransactions.OrderBy(x => x.TransactionDate))
-        {
-            <li>
-                <b>@cash.TransactionDate.ToShortDateString()</b> - @cash.Amount @cash.Currency
-                <br />
-                Type: @cash.TransactionType
-                @if (!string.IsNullOrEmpty(cash.Description))
-                {
-                    <div>
-                        <i>@cash.Description</i>
-                    </div>
-                }
-            </li>
-        }
-    </ul>
+    <MudDataGrid Items="@cashTransactions" Filterable="false" SortMode="@SortMode.Single" Groupable="false" title="Cash Transactions">
+        <Columns>
+            <PropertyColumn Property="x => x.TransactionDate" />
+            <PropertyColumn Property="x => x.Description" Title="Trade Direction" />
+            <PropertyColumn Property="x => x.Amount" />
+            <PropertyColumn Property="x => x.Currency" />            
+            <PropertyColumn Property="x => x.TransactionType" />
+        </Columns>
+    </MudDataGrid>
 }
 
 @code {
@@ -74,8 +49,10 @@ else
 
         foreach (var accId in accountIds)
         {
-            trades.AddRange(await TradeRepository.GetTradesByAccountIdAsync(accId));
-            cashTransactions.AddRange(await CashTransactionRepository.GetCashTransactionsByAccountIdAsync(accId));
+            var tradesLoaded = (await TradeRepository.GetTradesByAccountIdAsync(accId)).OrderBy(t => t.TradeDate);
+            var cashTransactionLoaded = (await CashTransactionRepository.GetCashTransactionsByAccountIdAsync(accId)).OrderBy(cash => cash.TransactionDate);
+            trades.AddRange(tradesLoaded);
+            cashTransactions.AddRange(cashTransactionLoaded);
         }        
     }
 }

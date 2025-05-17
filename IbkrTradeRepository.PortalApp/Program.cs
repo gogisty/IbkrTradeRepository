@@ -2,10 +2,12 @@ using IbkrTradeRepository.PortalApp.Data;
 using IbkrTradeRepository.PortalApp.Infrastructure.Persistance;
 using IbkrTradeRepository.PortalApp.Infrastructure.Persistance.Repositories;
 using Microsoft.EntityFrameworkCore;
+using MudBlazor.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddMudServices();
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 
